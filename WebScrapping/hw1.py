@@ -227,7 +227,7 @@ for castMember in castLinks:
 
             try:
                 A.append(name.text)
-                if name.text == "Ana Ortiz":
+                if name.text == "Jesse Eisenberg" or name.text =="Ludacris":
                     print("fd")
             except:
                 A.append("NULL")
@@ -260,6 +260,10 @@ for castMember in castLinks:
                 awardsHeader = co_actor_soup.find("span", id="Acting_credits_and_awards")
                 if awardsHeader != None:
                     awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
+            elif co_actor_soup.find("span", id="Accolades") != None:
+                awardsHeader = co_actor_soup.find("span", id="Accolades")
+                if awardsHeader != None:
+                    awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
             if awardsLink != None and awardsHeader!=None:
                 awardsLink = awardsLink.find_next('a')
                 if ("award" not in awardsLink.text):
@@ -273,6 +277,7 @@ for castMember in castLinks:
                     temp1=len(awards_soup.find_all(text='Won'))
                     temp2 = len(awards_soup.find_all(text='Won\n'))
                 awards =awards+ temp1+temp2
+
             D.append(awards)
 
 
