@@ -200,6 +200,9 @@ for castMember in castLinks:
         if (co_actor_vcard != None):
             try:
                 name = co_actor_vcard.find(class_="fn")
+                if (name == None):
+                    name = co_actor_vcard.find('th')
+
             except:
                 name = co_actor_vcard.find('th')
         else:
@@ -224,6 +227,8 @@ for castMember in castLinks:
 
             try:
                 A.append(name.text)
+                if name.text == "Ana Ortiz":
+                    print("fd")
             except:
                 A.append("NULL")
             try:
@@ -231,7 +236,10 @@ for castMember in castLinks:
             except:
                 B.append("NULL")
             try:
-                C.append(birthplace.text)
+                arr = birthplace.text.split(",")
+                length = len(arr)
+                C.append(arr[length - 1])
+                #C.append(birthplace.text)
             except:
                 C.append("NULL")
             awards = 0
@@ -239,7 +247,58 @@ for castMember in castLinks:
             # filmsCount.appenf(castCount[actorLink])
 
             awards = len(co_actor_soup.find_all(class_="yes table-yes2", text='Won\n'))
+
+
+            awardsHeader = co_actor_soup.find("span",id="Awards_and_nominations")
+            if awardsHeader != None :
+                awardsLink =awardsHeader.findNext('div',class_="hatnote navigation-not-searchable")
+
+                if awardsLink != None :
+                    awardsLink = awardsLink.find('a')
+                    if "award" not in awardsLink.text:
+                        awardsLink=awardsLink.findNext('a')
+                    awardsLink= awardsLink.get('href')
+                    awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
+                    awards_soup = BeautifulSoup(awardsPage, "lxml")
+                    awards = len(awards_soup.find_all(class_="yes table-yes2", text='Won\n')) + awards
+
+
+                else:
+                    awards = len(co_actor_soup.find_all(class_="yes table-yes2", text='Won\n'))
+
+            elif co_actor_soup.find("span", id="Filmography_and_awards") != None:
+                awardsHeader = co_actor_soup.find("span", id="Filmography_and_awards")
+                if awardsHeader != None:
+                    awardsLink = awardsHeader.findNext('div', class_="hatnote navigation-not-searchable")
+
+                    if awardsLink != None:
+                        awardsLink = awardsLink.find('a')
+                        if "award" not in awardsLink.text:
+                            awardsLink = awardsLink.findNext('a')
+
+                        awardsLink = awardsLink.get('href')
+                        awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
+                        awards_soup = BeautifulSoup(awardsPage, "lxml")
+                        awards = len(awards_soup.find_all(class_="yes table-yes2", text='Won\n')) + awards
+
+            elif co_actor_soup.find("span", id="Acting_credits_and_awards") != None:
+                awardsHeader = co_actor_soup.find("span", id="Acting_credits_and_awards")
+                if awardsHeader != None:
+                    awardsLink = awardsHeader.findNext('div', class_="hatnote navigation-not-searchable")
+
+                    if awardsLink != None:
+                        awardsLink = awardsLink.find('a')
+                        if "award" not in awardsLink.text:
+                            awardsLink = awardsLink.findNext('a')
+
+                        awardsLink = awardsLink.get('href')
+                        awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
+                        awards_soup = BeautifulSoup(awardsPage, "lxml")
+                        awards = len(awards_soup.find_all(class_="yes table-yes2", text='Won\n')) + awards
             D.append(awards)
+
+
+
 
 # In[ ]:
 
@@ -250,7 +309,12 @@ df2['Name'] = A
 df2['Birth Year'] = B
 df2['Birth Country'] = C
 df2['D']=D
+df2=df2.sort_values('Name')
 df2
+
+writer = pd.ExcelWriter('output.xlsx')
+df2.to_excel(writer,'Sheet2')
+writer.save()
 
 # Question 3:
 
