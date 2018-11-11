@@ -9,7 +9,6 @@ import urllib.request
 import pandas as pd
 from bs4 import BeautifulSoup
 import pandas as pd
-import urllib2
 from bs4 import BeautifulSoup
 from bs4 import BeautifulSoup
 
@@ -217,8 +216,12 @@ for castMember in castLinks:
         # first time - save info
         else:
             castCount[name.text] = 1
+            #use more pormats - eugine brave rock
             birthday = co_actor_vcard.find(class_="bday")
             birthplace = co_actor_vcard.find(class_="birthplace")
+            if birthplace == None and birthday != None:
+                birthplace = (birthday.parent).find_next('a')
+
             try:
                 A.append(name.text)
             except:
@@ -235,6 +238,9 @@ for castMember in castLinks:
             # actorName.append(name.text)
             # filmsCount.appenf(castCount[actorLink])
 
+            awards = len(co_actor_soup.find_all(class_="yes table-yes2", text='Won\n'))
+            D.append(awards)
+
 # In[ ]:
 
 
@@ -243,8 +249,7 @@ df2 = pd.DataFrame()
 df2['Name'] = A
 df2['Birth Year'] = B
 df2['Birth Country'] = C
-# df2['D']=D
-df2 = df2.sort_values('Name')
+df2['D']=D
 df2
 
 # Question 3:
