@@ -246,55 +246,33 @@ for castMember in castLinks:
             # actorName.append(name.text)
             # filmsCount.appenf(castCount[actorLink])
 
-            awards = len(co_actor_soup.find_all(class_="yes table-yes2", text='Won\n'))
-
-
+            #get from tables
+            awards = len(co_actor_soup.find_all(class_="yes table-yes2"))
+            #get from links
             awardsHeader = co_actor_soup.find("span",id="Awards_and_nominations")
             if awardsHeader != None :
-                awardsLink =awardsHeader.findNext('div',class_="hatnote navigation-not-searchable")
-
-                if awardsLink != None :
-                    awardsLink = awardsLink.find('a')
-                    if "award" not in awardsLink.text:
-                        awardsLink=awardsLink.findNext('a')
-                    awardsLink= awardsLink.get('href')
-                    awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
-                    awards_soup = BeautifulSoup(awardsPage, "lxml")
-                    awards = len(awards_soup.find_all(class_="yes table-yes2", text='Won\n')) + awards
-
-
-                else:
-                    awards = len(co_actor_soup.find_all(class_="yes table-yes2", text='Won\n'))
-
+                awardsLink =awardsHeader.find_next('div',class_="hatnote navigation-not-searchable")
             elif co_actor_soup.find("span", id="Filmography_and_awards") != None:
                 awardsHeader = co_actor_soup.find("span", id="Filmography_and_awards")
                 if awardsHeader != None:
-                    awardsLink = awardsHeader.findNext('div', class_="hatnote navigation-not-searchable")
-
-                    if awardsLink != None:
-                        awardsLink = awardsLink.find('a')
-                        if "award" not in awardsLink.text:
-                            awardsLink = awardsLink.findNext('a')
-
-                        awardsLink = awardsLink.get('href')
-                        awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
-                        awards_soup = BeautifulSoup(awardsPage, "lxml")
-                        awards = len(awards_soup.find_all(class_="yes table-yes2", text='Won\n')) + awards
-
+                    awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
             elif co_actor_soup.find("span", id="Acting_credits_and_awards") != None:
                 awardsHeader = co_actor_soup.find("span", id="Acting_credits_and_awards")
                 if awardsHeader != None:
-                    awardsLink = awardsHeader.findNext('div', class_="hatnote navigation-not-searchable")
-
-                    if awardsLink != None:
-                        awardsLink = awardsLink.find('a')
-                        if "award" not in awardsLink.text:
-                            awardsLink = awardsLink.findNext('a')
-
-                        awardsLink = awardsLink.get('href')
-                        awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
-                        awards_soup = BeautifulSoup(awardsPage, "lxml")
-                        awards = len(awards_soup.find_all(class_="yes table-yes2", text='Won\n')) + awards
+                    awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
+            if awardsLink != None and awardsHeader!=None:
+                awardsLink = awardsLink.find_next('a')
+                if ("award" not in awardsLink.text):
+                    awardsLink = awardsLink.find_next('a')
+                awardsLink = awardsLink.get('href')
+                awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
+                awards_soup = BeautifulSoup(awardsPage, "lxml")
+                temp1=len(awards_soup.find_all(class_="yes table-yes2", text='Won'))
+                temp2=len(awards_soup.find_all(class_="yes table-yes2", text='Won\n'))
+                if(temp1==0 and temp2==0):
+                    temp1=len(awards_soup.find_all(text='Won'))
+                    temp2 = len(awards_soup.find_all(text='Won\n'))
+                awards =awards+ temp1+temp2
             D.append(awards)
 
 
