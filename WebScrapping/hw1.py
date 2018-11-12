@@ -8,9 +8,6 @@
 import urllib.request
 import pandas as pd
 from bs4 import BeautifulSoup
-import pandas as pd
-from bs4 import BeautifulSoup
-from bs4 import BeautifulSoup
 
 
 # specify the url
@@ -167,8 +164,6 @@ B = []
 C = []
 D = []
 # for question3:
-actorName = []
-filmsCount = []
 castCount = dict()  # for Question 3 - number of films with gal gadot
 for castMember in castLinks:
     if castMember != "/wiki/Gal_Gadot":
@@ -206,13 +201,11 @@ for castMember in castLinks:
             except:
                 name = co_actor_vcard.find('th')
         else:
-            print("name prob " + castMember)
             continue
         # dupes - add count
         try:
             nameT = name.text
         except:
-            print(castMember + " name prob")
             continue
         if name.text in castCount.keys():
             castCount[name.text] = castCount[name.text] + 1
@@ -223,12 +216,19 @@ for castMember in castLinks:
             birthday = co_actor_vcard.find(class_="bday")
             birthplace = co_actor_vcard.find(class_="birthplace")
             if birthplace == None and birthday != None:
-                birthplace = (birthday.parent).find_next('a')
-
+                birthplaceText = (birthday.parent.parent).get_text()
+                if len((birthday.parent.parent).find_all('a'))==0:
+                    arr=None
+                else:
+                    arr = birthplaceText.split(",")
+            elif birthplace != None :
+                arr = birthplace.text.split(",")
+            else:
+                arr=None
+                # if(len(arr)>0):
+                #     birthplace=arr[len(arr)-1]
             try:
                 A.append(name.text)
-                if name.text == "Jesse Eisenberg" or name.text =="Ludacris":
-                    print("fd")
             except:
                 A.append("NULL")
             try:
@@ -236,48 +236,32 @@ for castMember in castLinks:
             except:
                 B.append("NULL")
             try:
-                arr = birthplace.text.split(",")
+                #ger country
                 length = len(arr)
-                C.append(arr[length - 1])
-                #C.append(birthplace.text)
+                country=arr[length - 1]
+                r=re.compile('[^a-zA-Z. ]')
+                country=r.sub('',country)
+                C.append(country)
             except:
                 C.append("NULL")
             awards = 0
             # actorName.append(name.text)
             # filmsCount.appenf(castCount[actorLink])
 
-            #get from tables
+            #get wins from tables
             awards = len(co_actor_soup.find_all(class_="yes table-yes2"))
-            #get from links
-            awardsHeader = co_actor_soup.find("span",id="Awards_and_nominations")
-            if awardsHeader != None :
-                awardsLink =awardsHeader.find_next('div',class_="hatnote navigation-not-searchable")
-            elif co_actor_soup.find("span", id="Filmography_and_awards") != None:
-                awardsHeader = co_actor_soup.find("span", id="Filmography_and_awards")
-                if awardsHeader != None:
-                    awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
-            elif co_actor_soup.find("span", id="Acting_credits_and_awards") != None:
-                awardsHeader = co_actor_soup.find("span", id="Acting_credits_and_awards")
-                if awardsHeader != None:
-                    awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
-            elif co_actor_soup.find("span", id="Accolades") != None:
-                awardsHeader = co_actor_soup.find("span", id="Accolades")
-                if awardsHeader != None:
-                    awardsLink = awardsHeader.find_next('div', class_="hatnote navigation-not-searchable")
-            if awardsLink != None and awardsHeader!=None:
-                awardsLink = awardsLink.find_next('a')
-                if ("award" not in awardsLink.text):
-                    awardsLink = awardsLink.find_next('a')
+            #get wins also from links
+            awardsLink=co_actor_soup.find(href=re.compile("List_of_awards"))
+            #if link exist
+            if awardsLink is not None:
+                #find the correct link
                 awardsLink = awardsLink.get('href')
+                #open awards page and count the wins
                 awardsPage = urllib.request.urlopen("https://en.wikipedia.org" + awardsLink)
                 awards_soup = BeautifulSoup(awardsPage, "lxml")
-                temp1=len(awards_soup.find_all(class_="yes table-yes2", text='Won'))
-                temp2=len(awards_soup.find_all(class_="yes table-yes2", text='Won\n'))
-                if(temp1==0 and temp2==0):
-                    temp1=len(awards_soup.find_all(text='Won'))
-                    temp2 = len(awards_soup.find_all(text='Won\n'))
+                temp1=len(awards_soup.find_all(text='Won'))
+                temp2 = len(awards_soup.find_all(text='Won\n'))
                 awards =awards+ temp1+temp2
-
             D.append(awards)
 
 
